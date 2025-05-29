@@ -4,6 +4,8 @@ from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
 import os
 
+from subject_manager import register_subject, list_subjects  # 追加
+
 app = Flask(__name__)
 
 line_bot_api = LineBotApi(os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
@@ -22,11 +24,22 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    message = event.message.text
+    user_id = event.source.user_id
+    text = event.message.text.strip()
+
+    if text.startswith("科目登録 "):
+        subject = text[len("科目登録 "):].strip()
+        reply = register_subject(user_id, subject)  # 呼び出し
+    elif text == "科目一覧":
+        reply = list_subjects(user_id)  # 呼び出し
+    else:
+        reply = "「科目登録 [科目名]」か「科目一覧」で操作してください。"
+
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=f"あなたのメッセージ：{message}")
+        TextSendMessage(text=reply)
     )
 
 if __name__ == "__main__":
     app.run()
+
