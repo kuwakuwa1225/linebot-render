@@ -2,9 +2,9 @@ from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
-import os
+from subject_manager import register_subject, list_subjects  # ← 追加
 
-from subject_manager import register_subject, list_subjects  # 追加
+import os
 
 app = Flask(__name__)
 
@@ -24,24 +24,20 @@ def callback():
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    user_id = event.source.user_id
-    text = event.message.text.strip()
+    text = event.message.text
 
-    if text.startswith("科目登録 "):
-        subject = text[len("科目登録 "):].strip()
-        reply = register_subject(user_id, subject)  # 呼び出し
+    if text.startswith("科目登録:"):
+        subject_name = text.replace("科目登録:", "").strip()
+        response = register_subject(subject_name)
     elif text == "科目一覧":
-        reply = list_subjects(user_id)  # 呼び出し
+        response = list_subjects()
     else:
-        reply = "「科目登録 [科目名]」か「科目一覧」で操作してください。"
+        response = f"あなたのメッセージ: {text}"
 
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=reply)
+        TextSendMessage(text=response)
     )
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # RenderがPORTを環境変数で指定
-    app.run(host="0.0.0.0", port=port)
-
-
+    app.run()
