@@ -26,8 +26,8 @@ def callback():
 def handle_message(event):
     text = event.message.text
 
-    if text.startswith("科目登録:"):
-        subject_name = text.replace("科目登録:", "").strip()
+    if text.startswith("科目登録"):
+        subject_name = text.replace("科目登録", "").strip()
         response = register_subject(subject_name)
     elif text == "科目一覧":
         response = list_subjects()
