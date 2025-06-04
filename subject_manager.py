@@ -10,3 +10,4 @@ def list_subjects():
     if not subjects:
         return "まだ科目が登録されていません。"
     return "登録された科目:\n" + "\n".join(f"{i+1}. {s}" for i, s in enumerate(subjects))
+
