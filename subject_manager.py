@@ -8,7 +8,6 @@ SUPABASE_API_KEY = os.getenv("SUPABASE_API_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_API_KEY)
 
 def register_subject(subject_name: str) -> str:
-    def register_subject(subject_name: str) -> str:
     try:
         response = supabase.table("subjects").insert({"name": subject_name}).execute()
         return f"DEBUG: status={response.status_code}, data={response.data}, error={response.error}"
