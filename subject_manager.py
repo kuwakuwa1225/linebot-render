@@ -9,10 +9,10 @@ supabase = create_client(SUPABASE_URL, SUPABASE_API_KEY)
 
 def register_subject(subject_name: str) -> str:
     try:
-        response = supabase.table("subjects").insert({"name": subject_name}).execute()
-        return f"DEBUG: status={response.status_code}, data={response.data}, error={response.error}"
+        res = supabase.table("subjects").insert({"name": subject_name}).execute()
+        return f"✅ 成功: {res.data}" if res.data else f"⚠️ ステータス: {res.status_code}, エラー: {res.error}"
     except Exception as e:
-        return f"登録エラー: {e}"
+        return f"❌ 例外発生: {e}"
 
     if not subject_name:
         return "科目名を入力してください。"
