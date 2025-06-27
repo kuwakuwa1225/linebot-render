@@ -6,10 +6,12 @@ SUPABASE_API_KEY = os.getenv("SUPABASE_API_KEY")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_API_KEY)
 
-def register_subject(subject_name: str, user_id: str) -> str:
+def register_subject(name: str, day: str, time: str, user_id: str) -> str:
     try:
         res = supabase.table("subjects").insert({
-            "name": subject_name,
+            "name": name,
+            "day_of_week": day,
+            "time": time,
             "user_id": user_id
         }).execute()
         return f"✅ 登録成功: {res.data}" if res.data else f"⚠️ エラー: {res.error}"
@@ -19,9 +21,9 @@ def register_subject(subject_name: str, user_id: str) -> str:
 
 def list_subjects(user_id: str) -> str:
     try:
-        res = supabase.table("subjects").select("name").eq("user_id", user_id).execute()
+        res = supabase.table("subjects").select("name", "day_of_week", "time").eq("user_id", user_id).execute()
         if res.data:
-            subjects = [item["name"] for item in res.data]
+            subjects = [f"{s['name']} ({s['day_of_week']} {s['time']})" for s in res.data]
             return "登録されている科目一覧:\n" + "\n".join(subjects)
         else:
             return "登録されている科目はありません。"
