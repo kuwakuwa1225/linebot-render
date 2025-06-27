@@ -39,6 +39,13 @@ def handle_message(event):
         event.reply_token,
         TextSendMessage(text=response)
     )
+def parse_register_command(text: str):
+    try:
+        _, name, day, time = text.strip().split()
+        return name, day, time
+    except:
+        return None, None, None
+
 
 
 if __name__ == "__main__":
