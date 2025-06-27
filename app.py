@@ -2,7 +2,7 @@ from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
-from subject_manager import register_subject, list_subjects  # ← 追加
+from subject_manager import register_subject, list_subjects  # ← 修正後にも対応
 
 import os
 
@@ -15,30 +15,12 @@ handler = WebhookHandler(os.getenv("LINE_CHANNEL_SECRET"))
 def callback():
     signature = request.headers['X-Line-Signature']
     body = request.get_data(as_text=True)
-
     try:
         handler.handle(body, signature)
     except InvalidSignatureError:
         abort(400)
     return 'OK'
 
-@handler.add(MessageEvent, message=TextMessage)
-def handle_message(event):
-    text = event.message.text
-    user_id = event.source.user_id  # ← 追加
-
-    if text.startswith("科目登録"):
-        subject_name = text.replace("科目登録", "").strip()
-        response = register_subject(subject_name, user_id)  # ← 引数追加
-    elif text == "科目一覧":
-        response = list_subjects(user_id)  # ← 引数追加
-    else:
-        response = f"あなたのメッセージ: {text}"
-
-    line_bot_api.reply_message(
-        event.reply_token,
-        TextSendMessage(text=response)
-    )
 def parse_register_command(text: str):
     try:
         _, name, day, time = text.strip().split()
@@ -46,7 +28,28 @@ def parse_register_command(text: str):
     except:
         return None, None, None
 
+@handler.add(MessageEvent, message=TextMessage)
+def handle_message(event):
+    text = event.message.text
+    user_id = event.source.user_id
 
+    if text.startswith("科目登録"):
+        name, day, time = parse_register_command(text)
+        if not all([name, day, time]):
+            response = "❌ 登録形式: 科目登録 科目名 曜日 時間（例：科目登録 数学 火 14:30）"
+        else:
+            response = register_subject(name, day, time, user_id)
+
+    elif text == "科目一覧":
+        response = list_subjects(user_id)
+
+    else:
+        response = f"あなたのメッセージ: {text}"
+
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=response)
+    )
 
 if __name__ == "__main__":
     app.run()
