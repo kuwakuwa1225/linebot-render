@@ -9,3 +9,32 @@ services:
         sync: false
       - key: ZyXgdJ6lWQoSUFbGn7lKCybo+lRzDxpWvNjRBobYFEMXgnuSXetSELF55G4bB9uxJ5sXCy4ej5sax5+dgHk6tEoszp1G8pWe8gB9BQKBMVJDHrERUz35mcFSBVrA1a/WwfvT7XJvb0cQ9V1PTn+oAwdB04t89/1O/w1cDnyilFU=
         sync: false
+name: LINE Notifier
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"  # 毎5分（日本時間では+9時間の差あり）
+  workflow_dispatch:
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10
+
+      - name: Install Dependencies
+        run: |
+          pip install line-bot-sdk supabase
+
+      - name: Run notify.py
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
+          LINE_CHANNEL_ACCESS_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+        run: python notify.py
