@@ -4,3 +4,5 @@ supabase
 gunicorn
 flask_sqlalchemy
 psycopg2-binary
+python-dotenv
+APScheduler
