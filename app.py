@@ -25,12 +25,13 @@ def callback():
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     text = event.message.text
+    user_id = event.source.user_id  # ← 追加
 
     if text.startswith("科目登録"):
         subject_name = text.replace("科目登録", "").strip()
-        response = register_subject(subject_name)
+        response = register_subject(subject_name, user_id)  # ← 引数追加
     elif text == "科目一覧":
-        response = list_subjects()
+        response = list_subjects(user_id)  # ← 引数追加
     else:
         response = f"あなたのメッセージ: {text}"
 
@@ -38,6 +39,7 @@ def handle_message(event):
         event.reply_token,
         TextSendMessage(text=response)
     )
+
 
 if __name__ == "__main__":
     app.run()
