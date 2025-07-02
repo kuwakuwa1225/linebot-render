@@ -40,14 +40,14 @@ subjects = res.data or []
 
 # ±10分以内の予定だけ通知
 for subject in subjects:
-    print(f"[DEBUG] チェック中: {subject['name']} at {subject['time']}")
-    print(f"[DEBUG] 差分: {abs((subject_time - now).total_seconds())}秒")
-
     try:
         subject_time_str = subject["time"]  # 例: "14:30"
         subject_time = datetime.strptime(subject_time_str, "%H:%M").replace(
             year=now.year, month=now.month, day=now.day, tzinfo=jst
         )
+        print(f"[DEBUG] チェック中: {subject['name']} at {subject['time']}")
+        print(f"[DEBUG] 差分: {abs((subject_time - now).total_seconds())}秒")
+
 
         if abs((subject_time - now).total_seconds()) <= 600:  # ±10分以内
             user_id = subject["user_id"]
