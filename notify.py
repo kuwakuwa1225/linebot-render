@@ -13,30 +13,44 @@ LINE_CHANNEL_ACCESS_TOKEN = os.getenv("LINE_CHANNEL_ACCESS_TOKEN")
 supabase = create_client(SUPABASE_URL, SUPABASE_API_KEY)
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 
-# 現在の JST 時刻
+# JSTの現在時刻を取得
 jst = pytz.timezone("Asia/Tokyo")
 now = datetime.now(jst)
-current_weekday = now.strftime("%A")
 
-# 10分後の時刻を計算（＝予定時間が「10分後」なら通知）
-target_time = (now + timedelta(minutes=10)).strftime("%H:%M")
+# 英語の曜日を1文字日本語に変換
+weekday_map = {
+    "Monday": "月",
+    "Tuesday": "火",
+    "Wednesday": "水",
+    "Thursday": "木",
+    "Friday": "金",
+    "Saturday": "土",
+    "Sunday": "日"
+}
+current_weekday_eng = now.strftime("%A")
+current_weekday = weekday_map[current_weekday_eng]
 
-# 条件に一致する行を検索
+# Supabaseから今日の予定を取得
 res = supabase.table("subjects") \
     .select("*") \
     .eq("day_of_week", current_weekday) \
-    .eq("time", target_time) \
     .execute()
 
 subjects = res.data or []
 
-# 通知を送信
+# ±10分以内の予定だけ通知
 for subject in subjects:
     try:
-        user_id = subject["user_id"]
-        name = subject["name"]
-        time = subject["time"]
-        message = f"⏰ まもなく {time} から「{name}」の授業です！"
-        line_bot_api.push_message(user_id, TextSendMessage(text=message))
+        subject_time_str = subject["time"]  # 例: "14:30"
+        subject_time = datetime.strptime(subject_time_str, "%H:%M").replace(
+            year=now.year, month=now.month, day=now.day, tzinfo=jst
+        )
+
+        if abs((subject_time - now).total_seconds()) <= 600:  # ±10分以内
+            user_id = subject["user_id"]
+            name = subject["name"]
+            message = f"⏰ もうすぐ「{name}」の授業です！（{subject_time_str}）"
+            line_bot_api.push_message(user_id, TextSendMessage(text=message))
+
     except Exception as e:
-        print("❌ LINE通知失敗:", e)
+        print("❌ 通知エラー:", e)
