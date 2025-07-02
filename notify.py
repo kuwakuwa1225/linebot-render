@@ -41,15 +41,15 @@ subjects = res.data or []
 # ±10分以内の予定だけ通知
 for subject in subjects:
     try:
-        subject_time_str = subject["time"]  # 例: "14:30"
-        subject_time = datetime.strptime(subject_time_str, "%H:%M").replace(
+        subject_time_str = subject["time"]  # 例: "11:30:00"
+        subject_time = datetime.strptime(subject_time_str, "%H:%M:%S").replace(
             year=now.year, month=now.month, day=now.day, tzinfo=jst
         )
-        print(f"[DEBUG] チェック中: {subject['name']} at {subject['time']}")
+
+        print(f"[DEBUG] チェック中: {subject['name']} at {subject_time_str}")
         print(f"[DEBUG] 差分: {abs((subject_time - now).total_seconds())}秒")
 
-
-        if abs((subject_time - now).total_seconds()) <= 600:  # ±10分以内
+        if abs((subject_time - now).total_seconds()) <= 600:
             user_id = subject["user_id"]
             name = subject["name"]
             message = f"⏰ もうすぐ「{name}」の授業です！（{subject_time_str}）"
@@ -57,5 +57,6 @@ for subject in subjects:
 
     except Exception as e:
         print("❌ 通知エラー:", e)
+        
 print(f"[DEBUG] 現在の曜日: {current_weekday}, 現在時刻: {now.strftime('%H:%M')}")
 print(f"[DEBUG] Supabaseから{len(subjects)}件の科目を取得")
