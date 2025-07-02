@@ -54,3 +54,5 @@ for subject in subjects:
 
     except Exception as e:
         print("❌ 通知エラー:", e)
+print(f"[DEBUG] 現在の曜日: {current_weekday}, 現在時刻: {now.strftime('%H:%M')}")
+print(f"[DEBUG] Supabaseから{len(subjects)}件の科目を取得")
