@@ -43,3 +43,22 @@ def list_subjects(user_id: str) -> str:
             return "📭 登録されている科目はありません。"
     except Exception:
         return "❌ 科目一覧の取得中にエラーが発生しました。"
+
+# ユーザーの特定科目を削除する関数
+def delete_subject(name: str, user_id: str) -> str:
+    if not name or not user_id:
+        return "⚠️ 科目名とユーザーIDを指定してください。"
+
+    try:
+        res = supabase.table("subjects") \
+            .delete() \
+            .eq("name", name) \
+            .eq("user_id", user_id) \
+            .execute()
+
+        if res.data:
+            return f"🗑️ 科目「{name}」を削除しました。"
+        else:
+            return f"⚠️ 科目「{name}」は見つかりませんでした。"
+    except Exception:
+        return "❌ 科目の削除中にエラーが発生しました。"
