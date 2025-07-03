@@ -2,7 +2,7 @@ from flask import Flask, request, abort
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage
-from subject_manager import register_subject, list_subjects  # ← 修正後にも対応
+from subject_manager import register_subject, list_subjects, delete_subject  # ← ここ追加
 
 import os
 
@@ -42,6 +42,13 @@ def handle_message(event):
 
     elif text == "科目一覧":
         response = list_subjects(user_id)
+
+    elif text.startswith("科目削除"):
+        name = text.replace("科目削除", "").strip()
+        if not name:
+            response = "❌ 削除形式: 科目削除 科目名（例：科目削除 数学）"
+        else:
+            response = delete_subject(name, user_id)
 
     else:
         response = f"あなたのメッセージ: {text}"
