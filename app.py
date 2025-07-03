@@ -50,9 +50,6 @@ def handle_message(event):
         else:
             response = delete_subject(name, user_id)
 
-    else:
-        response = f"あなたのメッセージ: {text}"
-
     line_bot_api.reply_message(
         event.reply_token,
         TextSendMessage(text=response)
