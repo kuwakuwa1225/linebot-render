@@ -42,9 +42,10 @@ subjects = res.data or []
 for subject in subjects:
     try:
         subject_time_str = subject["time"]  # 例: "11:30:00"
-        subject_time = datetime.strptime(subject_time_str, "%H:%M:%S").replace(
-            year=now.year, month=now.month, day=now.day, tzinfo=jst
-        )
+        subject_time_naive = datetime.strptime(subject_time_str, "%H:%M:%S")
+        subject_time = jst.localize(subject_time_naive.replace(
+            year=now.year, month=now.month, day=now.day
+        ))
 
         print(f"[DEBUG] チェック中: {subject['name']} at {subject_time_str}")
         print(f"[DEBUG] 差分: {abs((subject_time - now).total_seconds())}秒")
@@ -57,6 +58,6 @@ for subject in subjects:
 
     except Exception as e:
         print("❌ 通知エラー:", e)
-        
+
 print(f"[DEBUG] 現在の曜日: {current_weekday}, 現在時刻: {now.strftime('%H:%M')}")
 print(f"[DEBUG] Supabaseから{len(subjects)}件の科目を取得")
